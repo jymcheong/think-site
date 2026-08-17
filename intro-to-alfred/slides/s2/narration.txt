@@ -1,0 +1,1 @@
+What if your assistant had persistent, git-backed memory that follows you across VS Code, the terminal, and mobile chat without vendor lock-in?

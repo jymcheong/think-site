@@ -1,0 +1,1 @@
+Getting started is seamless across both interfaces. In VS Code, install the official Claude Code extension or run the Claude Code CLI directly inside the integrated terminal. For native terminal users, launch Claude Code CLI, opencode, or agy natively. Both interfaces share the exact same underlying workspace files.

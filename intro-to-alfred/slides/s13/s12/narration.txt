@@ -1,0 +1,1 @@
+Here is your call to action. Your next tasks are to complete the three workshop challenges: prompt your agent to improve the SOC tab, visually verify the dashboard using Playwright, and persist your changes with the git-commit skill. Open your workspace and begin.

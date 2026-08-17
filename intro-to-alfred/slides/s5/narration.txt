@@ -1,0 +1,1 @@
+The primary breakdown in agentic software development is specification drift, where markdown documents and actual code diverge over time. ALFRED solves this by bundling Sprint and TDD skills. As features are built and validated through test-driven development, empirical results are automatically flushed back into current knowledge files and append-only timelines.

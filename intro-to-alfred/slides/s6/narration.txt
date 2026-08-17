@@ -1,0 +1,1 @@
+Before touching code, ALFRED recalls state from knowledge files. It actuates precise edits, then persists timeline evidence for the next turn.

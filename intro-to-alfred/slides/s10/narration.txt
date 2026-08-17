@@ -1,0 +1,1 @@
+The handover package comes with a Quick Start prompt in README.md that boots the 5G SOC/NOC dashboard mock-up immediately. Once running, students experience live prompting by typing their own natural language instructions to improve the dashboard on the fly.

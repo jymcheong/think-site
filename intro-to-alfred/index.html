@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Introducing ALFRED & memOS</title>
+<style>
+  :root {
+    --bg: #070b14;
+    --card: rgba(255, 255, 255, 0.04);
+    --border: rgba(255, 255, 255, 0.1);
+    --accent: #38bdf8;
+    --text: #f8fafc;
+    --muted: #9ca3af;
+    --ok: #10b981;
+    --warn: #f59e0b;
+    --code-bg: rgba(0, 0, 0, 0.4);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  
+  .stage { width: 96vw; height: 90vh; background: var(--card); border: 1px solid var(--border); border-radius: 20px; backdrop-filter: blur(16px); position: relative; display: flex; flex-direction: column; justify-content: center; padding: 4vh 4vw; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
+  .slide { display: none; flex-direction: column; gap: 2.5vh; }
+  .slide.active { display: flex; }
+  
+  .eyebrow { font-size: 2.5vh; color: var(--accent); text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; }
+  .head { font-size: 6.8vh; font-weight: 800; line-height: 1.1; margin: 0; color: var(--text); }
+  .sub { font-size: 3.2vh; color: var(--muted); max-width: 95%; line-height: 1.45; margin-top: 1vh; font-weight: 400; }
+  
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 2.5vh; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 2.5vh; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; margin-top: 2.5vh; }
+  .box { background: rgba(255,255,255,0.05); border: 1.5px solid var(--border); border-radius: 14px; padding: 28px 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+  .box h4 { margin: 0 0 14px 0; color: var(--accent); font-size: 3.0vh; font-weight: 700; }
+  .box p { margin: 0; color: #cbd5e1; font-size: 2.5vh; line-height: 1.45; font-weight: 400; }
+
+  .diag-container { display: flex; justify-content: center; align-items: center; margin-top: 2vh; }
+  .diag-img { width: 52vh; height: 52vh; object-fit: contain; border-radius: 16px; border: 1.5px solid var(--border); box-shadow: 0 16px 40px rgba(0,0,0,0.7); }
+
+  .tree-layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 28px; margin-top: 2.5vh; }
+  .tree-code { background: var(--code-bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 22px 24px; font-family: monospace; font-size: 2.4vh; color: #38bdf8; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+  .prompt-box { background: rgba(16, 185, 129, 0.08); border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 14px; padding: 24px 28px; }
+  .prompt-box h4 { color: var(--ok); margin: 0 0 14px 0; font-size: 3.0vh; font-weight: 700; }
+  .prompt-box p { color: var(--text); font-size: 2.5vh; margin: 0; line-height: 1.5; font-style: italic; white-space: normal; word-wrap: break-word; overflow-wrap: break-word; }
+
+  .splash { position: absolute; inset: 0; background: rgba(7,11,20,0.96); z-index: 10; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
+  .splash h2 { font-size: 4.8vh; color: var(--accent); margin-bottom: 2vh; }
+  .splash p { font-size: 2.6vh; color: var(--muted); }
+
+  .nav { position: absolute; bottom: 2.5vh; left: 4vw; right: 4vw; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
+  .progress { display: flex; gap: 10px; align-items: center; }
+  .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--border); transition: all 0.3s; cursor: pointer; border: 2px solid transparent; }
+  .dot:hover { background: var(--accent); opacity: 0.8; transform: scale(1.25); }
+  .dot.active { background: var(--accent); box-shadow: 0 0 12px var(--accent); border-color: #fff; transform: scale(1.25); }
+  .controls { display: flex; gap: 14px; }
+  .btn { background: var(--border); border: none; color: var(--text); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 2.2vh; font-weight: 600; }
+  .btn:hover { background: var(--accent); color: #000; }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div id="splash" class="splash" onclick="startDeck()">
+      <h2>▶ Click to Start Presentation</h2>
+      <p>ElevenLabs Aria Voiceover & Auto-Advance Enabled (14 Slides)</p>
+    </div>
+
+    <!-- Hidden Slide Audio Elements -->
+    <audio id="a0" src="slides/s0/audio.mp3" preload="auto"></audio>
+    <audio id="a1" src="slides/s1/audio.mp3" preload="auto"></audio>
+    <audio id="a2" src="slides/s2/audio.mp3" preload="auto"></audio>
+    <audio id="a3" src="slides/s3/audio.mp3" preload="auto"></audio>
+    <audio id="a4" src="slides/s4/audio.mp3" preload="auto"></audio>
+    <audio id="a5" src="slides/s5/audio.mp3" preload="auto"></audio>
+    <audio id="a6" src="slides/s6/audio.mp3" preload="auto"></audio>
+    <audio id="a7" src="slides/s7/audio.mp3" preload="auto"></audio>
+    <audio id="a8" src="slides/s8/audio.mp3" preload="auto"></audio>
+    <audio id="a9" src="slides/s9/audio.mp3" preload="auto"></audio>
+    <audio id="a10" src="slides/s10/audio.mp3" preload="auto"></audio>
+    <audio id="a11" src="slides/s11/audio.mp3" preload="auto"></audio>
+    <audio id="a12" src="slides/s12/audio.mp3" preload="auto"></audio>
+    <audio id="a13" src="slides/s13/audio.mp3" preload="auto"></audio>
+
+    <!-- Slide 0 -->
+    <div class="slide active" id="s0">
+      <div class="eyebrow">Beat 0 — The Hook</div>
+      <h1 class="head">Zero Shared Context</h1>
+      <div class="sub">Every session starts from absolute zero. Past decisions vanish into dark archives.</div>
+    </div>
+
+    <!-- Slide 1 -->
+    <div class="slide" id="s1">
+      <div class="eyebrow">Beat 1 — The Pain</div>
+      <h1 class="head">The Friction of Context Loss</h1>
+      <div class="sub">Re-explaining repository layouts and copy-pasting code snippets across tools.</div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide" id="s2">
+      <div class="eyebrow">Beat 2 — The Solution</div>
+      <h1 class="head">Enter ALFRED & memOS</h1>
+      <div class="sub">Persistent, git-backed memory across VS Code, CLI, and mobile chat.</div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide" id="s3">
+      <div class="eyebrow">Beat 3 — Architectural Differentiator</div>
+      <h1 class="head">Why ALFRED vs. Specs-Driven Systems</h1>
+      <div class="sub">Dynamic repo-grounded memory vs. rigid, heavy specification documents:</div>
+      <div class="grid-2">
+        <div class="box" style="border-color: rgba(245, 158, 11, 0.4);">
+          <h4 style="color: var(--warn)">Traditional Specs-Driven Systems</h4>
+          <p>Over-engineered spec documents that quickly suffer from documentation drift, get stale, and break runtime agent execution.</p>
+        </div>
+        <div class="box" style="border-color: rgba(16, 185, 129, 0.4);">
+          <h4 style="color: var(--ok)">ALFRED Markdown Memory</h4>
+          <p>Lightweight, human-readable markdown knowledge files grounded in live code state with sequential gate recall.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide" id="s4">
+      <div class="eyebrow">Beat 4 — Why Plain Markdown Wins</div>
+      <h1 class="head">Markdown vs. Vector & Graph DBs</h1>
+      <div class="sub">Why lightweight text memory beats complex, opaque database stacks:</div>
+      <div class="grid-4">
+        <div class="box">
+          <h4 style="color: var(--ok)">1. Human Readable</h4>
+          <p>100% transparent text. Inspect and edit directly — no unreadable vector embeddings.</p>
+        </div>
+        <div class="box">
+          <h4 style="color: var(--ok)">2. Zero Infra Overhead</h4>
+          <p>No Neo4j, pgvector, or Pinecone daemons. Zero setup complexity.</p>
+        </div>
+        <div class="box">
+          <h4 style="color: var(--ok)">3. Git Diff Auditable</h4>
+          <p>Line-by-line git diff transparency for every single memory change.</p>
+        </div>
+        <div class="box">
+          <h4 style="color: var(--ok)">4. Vendor Agnostic</h4>
+          <p>Plain files in your git repo. Never locked into proprietary frameworks.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 5 -->
+    <div class="slide" id="s5">
+      <div class="eyebrow">Beat 5 — Preventing Spec-Code Drift</div>
+      <h1 class="head">Flushing Code & Test Evidence</h1>
+      <div class="sub">How Sprint & TDD skills continuously synchronize markdown specs with actual code:</div>
+      <div class="grid-2">
+        <div class="box">
+          <h4>Sprint Task Management</h4>
+          <p>Work items are planned, executed, and verified step-by-step. Completed work is immediately flushed back to `knowledge/*.md` current state.</p>
+        </div>
+        <div class="box">
+          <h4>TDD Test-Driven Verification</h4>
+          <p>Tests provide empirical proof of working code. Test results and evidence logs are automatically appended to `knowledge/*.timeline.md`.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 6 -->
+    <div class="slide" id="s6">
+      <div class="eyebrow">Beat 6 — The Core Operational Loop</div>
+      <h1 class="head">Recall. Actuate. Persist.</h1>
+      <div class="sub">The 3-stage execution loop driving ALFRED's persistent memory architecture:</div>
+      <div class="diag-container">
+        <img class="diag-img" src="slides/s6_circular_loop.jpg" alt="Recall Actuate Persist Circular Loop Diagram"/>
+      </div>
+    </div>
+
+    <!-- Slide 7 -->
+    <div class="slide" id="s7">
+      <div class="eyebrow">Beat 7 — The Meaning</div>
+      <h1 class="head">Your Work. Your Format.</h1>
+      <div class="sub">Plain markdown files in your repository that your team owns completely.</div>
+    </div>
+
+    <!-- Slide 8 -->
+    <div class="slide" id="s8">
+      <div class="eyebrow">Beat 8 — The Invitation</div>
+      <h1 class="head">Live in 15 Minutes</h1>
+      <div class="sub">Open your workspace, launch your agent, and experience memory in action.</div>
+    </div>
+
+    <!-- Slide 9 -->
+    <div class="slide" id="s9">
+      <div class="eyebrow">Beat 9 — Repository Architecture</div>
+      <h1 class="head">The Project Blueprint</h1>
+      <div class="sub">Three core directories driving agent orientation and state persistence:</div>
+      <div class="grid-3">
+        <div class="box">
+          <h4>assets/</h4>
+          <p>Application code, scripts, HTML UIs, and project deliverables.</p>
+        </div>
+        <div class="box">
+          <h4>knowledge/</h4>
+          <p>Current state documents (*.md) and append-only timelines (*.timeline.md).</p>
+        </div>
+        <div class="box">
+          <h4>skills/</h4>
+          <p>Task procedures and step-by-step operational playbooks.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 10 -->
+    <div class="slide" id="s10">
+      <div class="eyebrow">Beat 10 — Handover Package</div>
+      <h1 class="head">The Handover Package Anatomy</h1>
+      <div class="sub">Full zip structure & the 1-line Boot Prompt in README.md:</div>
+      <div class="tree-layout">
+        <div class="tree-code">handover-2026-08-12.zip
+├── README.md        (Boot Prompt)
+├── HANDOVER.md      (Full Specs)
+├── CLAUDE.md / AGENT.md (Directives)
+├── SKILLS.md        (Filtered)
+├── KNOWLEDGE-INDEX.md
+├── assets/          (Code)
+├── knowledge/       (Memory)
+└── skills/          (Playbooks)</div>
+        <div class="prompt-box">
+          <h4>⚡ README.md Boot Prompt</h4>
+          <p>"Execute startup sequence: read CLAUDE.md / AGENT.md to initialize core ALFRED directives, capture timestamp, check/install Playwright and Chromium dependencies, and read HANDOVER.md to orient on the project and boot the 5G SOC/NOC dashboard."</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 11 -->
+    <div class="slide" id="s11">
+      <div class="eyebrow">Beat 11 — Getting Started</div>
+      <h1 class="head">VS Code vs. CLI Setup</h1>
+      <div class="sub">Pick your preferred interface — both read the same underlying files:</div>
+      <div class="grid-2">
+        <div class="box">
+          <h4>VS Code (Extension or Terminal CLI)</h4>
+          <p>Install official <strong>Claude Code</strong> extension OR run <strong>Claude Code CLI</strong> (`claude`) inside VS Code's integrated terminal.</p>
+        </div>
+        <div class="box">
+          <h4>Native Terminal CLI</h4>
+          <p>Run <strong>Claude Code CLI</strong> (`claude`), <strong>opencode</strong>, or <strong>agy</strong> natively in your terminal. Full local execution.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 12 -->
+    <div class="slide" id="s12">
+      <div class="eyebrow">Beat 12 — Safety Net & git-commit</div>
+      <h1 class="head">Local Git & git-commit Skill</h1>
+      <div class="sub">Version control turns agentic coding into a transparent, safe workflow:</div>
+      <div class="grid-3">
+        <div class="box">
+          <h4 style="color: var(--ok)">git-commit Skill</h4>
+          <p>Executes local git commit, flushes timeline logs, rebuilds index, and strictly skips `git push`.</p>
+        </div>
+        <div class="box">
+          <h4 style="color: var(--ok)">Undo Safety</h4>
+          <p>One-command rollback (`git reset --hard`) if an agent edit breaks things.</p>
+        </div>
+        <div class="box">
+          <h4 style="color: var(--ok)">Audit History</h4>
+          <p>Immutable local commit log tracking what changed and why.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 13 -->
+    <div class="slide" id="s13">
+      <div class="eyebrow">Beat 13 — Workshop Challenges</div>
+      <h1 class="head">Your Call to Action</h1>
+      <div class="sub">Three hands-on challenges to complete during the workshop session:</div>
+      <div class="grid-3">
+        <div class="box">
+          <h4>1. Prompt Dashboard Edit</h4>
+          <p>Instruct agent to fix SOC update rates and add smooth sparklines.</p>
+        </div>
+        <div class="box">
+          <h4>2. Visual Verification</h4>
+          <p>Use Playwright / Chrome headless to capture screenshot evidence.</p>
+        </div>
+        <div class="box">
+          <h4>3. Persist & Commit</h4>
+          <p>Run `git-commit` to update timeline log and save local git commit.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div class="progress" id="progress"></div>
+      <div class="controls">
+        <button class="btn" onclick="prevSlide()">Prev</button>
+        <button class="btn" onclick="nextSlide()">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let current = 0;
+    const total = 14;
+
+    function renderDots() {
+      const p = document.getElementById('progress');
+      p.innerHTML = '';
+      for(let i=0; i<total; i++) {
+        const d = document.createElement('div');
+        d.className = 'dot' + (i === current ? ' active' : '');
+        d.title = 'Jump to Beat ' + i;
+        d.onclick = () => showSlide(i);
+        p.appendChild(d);
+      }
+    }
+
+    function stopAllAudio() {
+      for(let i=0; i<total; i++) {
+        const a = document.getElementById('a' + i);
+        if (a) {
+          a.pause();
+          a.currentTime = 0;
+        }
+      }
+    }
+
+    function showSlide(idx) {
+      stopAllAudio();
+      document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+      document.getElementById('s' + idx).classList.add('active');
+      current = idx;
+      renderDots();
+      playAudio(idx);
+    }
+
+    function playAudio(idx) {
+      const audio = document.getElementById('a' + idx);
+      if (!audio) return;
+      
+      console.log('SLIDE_SWITCH:' + idx + ':' + Date.now());
+
+      audio.onended = () => {
+        if (current < total - 1) {
+          setTimeout(() => nextSlide(), 500); // Fixed 500ms delay between slides
+        }
+      };
+
+      audio.play().catch(e => console.log('Autoplay blocked:', e));
+    }
+
+    function startDeck() {
+      document.getElementById('splash').style.display = 'none';
+      showSlide(0);
+    }
+
+    function nextSlide() {
+      if (current < total - 1) showSlide(current + 1);
+    }
+
+    function prevSlide() {
+      if (current > 0) showSlide(current - 1);
+    }
+
+    if (new URLSearchParams(window.location.search).get('autoplay') === '1') {
+      window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('splash').style.display = 'none';
+        showSlide(0);
+      });
+    }
+
+    renderDots();
+  </script>
+</body>
+</html>

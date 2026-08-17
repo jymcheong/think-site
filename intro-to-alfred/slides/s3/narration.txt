@@ -1,0 +1,1 @@
+Unlike rigid specification-driven systems that attempt to pre-script every single requirement, ALFRED uses lightweight, human-readable markdown memory. It grounds agent execution in active repository context, avoiding stale documentation drift and enabling precise, incremental recall.

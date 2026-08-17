@@ -1,0 +1,411 @@
+<div id="main-content">
+  <a href="#posts" style="color: #06b6d4; text-decoration: none; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 1.5rem;">
+    &larr; Back to Articles
+  </a>
+
+  <h1 style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff; line-height: 1.2;">
+    From Conversation to Action: How AI Redefined the Attack Surface
+  </h1>
+
+  <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 2rem; display: flex; gap: 1rem; font-family: 'Space Grotesk', sans-serif;">
+    <span>Published: July 24, 2026</span>
+    <span>•</span>
+    <span>Category: Agentic Security</span>
+  </div>
+
+  <div style="color: #94a3b8; font-size: 1rem; line-height: 1.7; display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <p>
+      As AI moved from chat interfaces to coding tools to autonomous agents, its reach into real systems grew. So did the attack surface, and the security models built for each prior era didn't carry over.
+    </p>
+
+    <!-- CSS Timeline -->
+    <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0.5rem 0;">
+      <div style="position: relative; padding: 2.5rem 0 1rem; min-width: 520px;">
+      <!-- connecting line -->
+      <div style="position: absolute; top: 2.75rem; left: 65px; right: 65px; height: 2px; background: linear-gradient(to right, #06b6d4, #818cf8, #f59e0b, #ef4444);"></div>
+
+      <div style="display: flex; align-items: flex-start;">
+
+        <!-- Chat -->
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1;">
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #06b6d4; box-shadow: 0 0 10px rgba(6,182,212,0.6);"></div>
+          <div style="color: #fff; font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; margin-top: 0.75rem;">Chat</div>
+          <div style="color: #475569; font-size: 0.72rem; margin-top: 0.15rem;">from 2022</div>
+          <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.6rem; text-align: center; line-height: 1.5;">Jailbreaks<br>Prompt injection<br>System prompt leak</div>
+        </div>
+
+        <!-- Coding -->
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1;">
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #818cf8; box-shadow: 0 0 10px rgba(129,140,248,0.6);"></div>
+          <div style="color: #fff; font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; margin-top: 0.75rem;">Coding</div>
+          <div style="color: #475569; font-size: 0.72rem; margin-top: 0.15rem;">from 2023</div>
+          <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.6rem; text-align: center; line-height: 1.5;">AI slop → tech debt<br>Supply chain poison<br>Phantom packages</div>
+        </div>
+
+        <!-- Cognitive Work -->
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1;">
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 10px rgba(245,158,11,0.6);"></div>
+          <div style="color: #fff; font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; margin-top: 0.75rem;">Cognitive Work</div>
+          <div style="color: #475569; font-size: 0.72rem; margin-top: 0.15rem;">from 2023</div>
+          <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.6rem; text-align: center; line-height: 1.5;">Adversarial docs<br>Wrong decisions<br>No forensic trace</div>
+        </div>
+
+        <!-- Agentic -->
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1;">
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 10px rgba(239,68,68,0.7);"></div>
+          <div style="color: #fff; font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; margin-top: 0.75rem;">Agentic</div>
+          <div style="color: #475569; font-size: 0.72rem; margin-top: 0.15rem;">from 2024</div>
+          <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.6rem; text-align: center; line-height: 1.5;">Indirect injection<br>Tool weaponisation<br>Content-channel entry</div>
+        </div>
+
+      </div>
+      </div>
+    </div>
+
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      Same Attack Shapes. Unsolvable at the Semantic Layer.
+    </h2>
+    <p>
+      The attack shapes are familiar: injection, impersonation, privilege escalation. Prompt injection and SQL injection are structurally the same thing: attacker-controlled input that changes execution intent. What changed is how the attack is expressed.
+    </p>
+    <p>
+      In deterministic systems, defenders can enumerate valid states and block invalid ones. A WAF can reject <code>'; DROP TABLE--</code> because SQL is a formal grammar with a finite valid space. In an LLM system, there is no such boundary. Every string of natural language is potentially legitimate input. Defense at the syntactic layer fails because the attack lives at the semantic layer, and semantics cannot be pattern-matched.
+    </p>
+    <p>
+      Consider the compounding: we've spent decades building defenses for deterministic systems, and those systems still get breached regularly. AI adds a non-deterministic layer on top of that existing struggle. Same attack shapes, but the input space is now infinite natural language, execution is probabilistic, and "correct" output isn't formally defined. The difficulty doesn't just increase. It changes category.
+    </p>
+
+    <!-- Contrast Table -->
+    <div style="overflow-x: auto; border: 1px solid rgba(6, 182, 212, 0.15); border-radius: 8px; background: rgba(22, 29, 48, 0.4);">
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; min-width: 560px;">
+        <thead>
+          <tr style="background: rgba(6, 182, 212, 0.08); border-bottom: 1px solid rgba(6, 182, 212, 0.15);">
+            <th style="padding: 0.75rem 1rem; color: #94a3b8; font-family: var(--font-heading); font-weight: 600; width: 22%;">Dimension</th>
+            <th style="padding: 0.75rem 1rem; color: #fff; font-family: var(--font-heading); font-weight: 700;">Deterministic Layer (App / API)</th>
+            <th style="padding: 0.75rem 1rem; color: #f87171; font-family: var(--font-heading); font-weight: 700;">Non-Deterministic Layer (AI / LLM)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">Attack vector</td>
+            <td style="padding: 0.75rem 1rem;">HTTP requests, SQL strings, binary payloads</td>
+            <td style="padding: 0.75rem 1rem; color: #fca5a5;">Natural language prompts</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">Target</td>
+            <td style="padding: 0.75rem 1rem;">Application logic, database, OS</td>
+            <td style="padding: 0.75rem 1rem; color: #fca5a5;">Model behaviour, guardrails, system prompts</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">Payload format</td>
+            <td style="padding: 0.75rem 1rem;">Structured: code, bytes, query syntax</td>
+            <td style="padding: 0.75rem 1rem; color: #fca5a5;">Unstructured: plain text, infinite variations</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">Detection</td>
+            <td style="padding: 0.75rem 1rem;">WAF rules, regex, IDS signatures</td>
+            <td style="padding: 0.75rem 1rem; color: #fca5a5;">No reliable signature: semantic rewrites evade every filter</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">Blast radius</td>
+            <td style="padding: 0.75rem 1rem;">Data exfil, RCE, privilege escalation</td>
+            <td style="padding: 0.75rem 1rem; color: #fca5a5;">Policy bypass, prompt leak (bounded by model having no real-world reach)</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">Defender's lever</td>
+            <td style="padding: 0.75rem 1rem;">Block the malformed input</td>
+            <td style="padding: 0.75rem 1rem; color: #fca5a5;">Can't reliably block natural language; must constrain what the model can <em>do</em></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      That last row is the crux. In the app layer, defenders block bad inputs. In the AI layer, the "bad input" is text, and text cannot be reliably blocked. Two years of prompt filter research confirmed this. None of them held.
+    </p>
+    <p>
+      Defenders were still working on that problem when the capability curve jumped. GPT-4 didn't just make jailbreaks harder to patch. It sent generative AI in two directions at once: into developer tooling as a code contributor, and into professional workflows as an information source. The attack surface didn't move domains. It forked.
+    </p>
+
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      Coding: Compromised Supply, Sloppy Process
+    </h2>
+    <p>
+      GitHub Copilot wired AI into developer workflows in 2023, making AI a direct contributor to code that ships. Two problems entered together: the supply side feeding into development was compromised, and the development process itself became sloppier.
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+
+      <div style="padding: 1rem 1.25rem; background: rgba(22,29,48,0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
+          <span style="background: rgba(239,68,68,0.12); color: #f87171; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 4px;">01</span>
+          <span style="color: #fff; font-family: var(--font-heading); font-weight: 700;">Supply Side: The AI Tool Is the Attack Vector</span>
+        </div>
+        <div style="font-size: 0.9rem; line-height: 1.6;">What enters the development process is no longer clean. Two routes in: <strong style="color: #e2e8f0;">poisoned model weights</strong>: training data manipulated to plant subtle vulnerabilities (weak crypto, auth bypass, hardcoded secrets) that the model then suggests as correct code; and <strong style="color: #e2e8f0;">phantom package squatting</strong>: the model hallucinates package names that don't exist, attackers register those names on PyPI / npm / crates.io with malicious payloads, developer follows the AI's recommendation and installs attacker-controlled code. Both routes share the same attack surface: developer trust in the AI tool. Both bypass traditional supply chain controls entirely, because the AI is the supply chain.</div>
+      </div>
+
+      <div style="padding: 1rem 1.25rem; background: rgba(22,29,48,0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
+          <span style="background: rgba(129,140,248,0.15); color: #818cf8; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 4px;">02</span>
+          <span style="color: #fff; font-family: var(--font-heading); font-weight: 700;">Process: AI Slop Accumulates as Opaque Debt</span>
+        </div>
+        <div style="font-size: 0.9rem; line-height: 1.6;">The development process itself degrades. AI-generated code that "works" gets accepted without deep review: copy-pasted patterns, redundant logic, subtle off-by-one assumptions. Large sections of the codebase accumulate that nobody fully understands, which is exactly the condition that makes vulnerabilities hard to find and easy to introduce. Security audit breaks at scale when the team can't reason about what they shipped.</div>
+      </div>
+
+    </div>
+
+    <p>
+      The downstream effect is the compound: code that may have been designed to be vulnerable, built through a process that can't audit itself at scale. That was one fork. Running in parallel, the same capability was entering professional workflows: not as a code contributor, but as the information source organisations were reading, citing, and acting on.
+    </p>
+
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      Information Work: AI as the Information Layer
+    </h2>
+    <p>
+      The same models that generated code began handling professional research: contract review, financial due diligence, legal analysis, threat triage. The capability wasn't new. What changed was organisational trust. Lawyers, auditors, and analysts started treating AI summaries as authoritative input to decisions they no longer had time to verify at source.
+    </p>
+    <p>
+      What's telling is that no attacker was needed. The model's own hallucinations caused the damage, generated with the same confidence as accurate output, and trusted the same way. That reliability gap is also an adversarial gap: any organisation that has demonstrated it won't verify AI output is equally exposed to content deliberately crafted to steer the AI's conclusions. The gap hallucination exposes is the same gap an attacker would exploit.
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+
+      <div style="padding: 1rem 1.25rem; background: rgba(22,29,48,0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
+          <span style="background: rgba(6,182,212,0.12); color: #06b6d4; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 4px;">LEGAL</span>
+          <span style="color: #fff; font-family: var(--font-heading); font-weight: 700;">Mata v. Avianca: Fabricated Precedents</span>
+        </div>
+        <div style="font-size: 0.9rem; line-height: 1.6;">A lawyer submitted six ChatGPT-generated case citations to a US federal court. None existed. The cases, quotes, and legal reasoning were fabricated wholesale. The lawyer had not verified a single source. The judge sanctioned the firm. The same pattern repeated across multiple jurisdictions as legal teams treated AI research output as authoritative.</div>
+      </div>
+
+      <div style="padding: 1rem 1.25rem; background: rgba(22,29,48,0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
+          <span style="background: rgba(129,140,248,0.12); color: #818cf8; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 4px;">CONSULTING</span>
+          <span style="color: #fff; font-family: var(--font-heading); font-weight: 700;">KPMG: 89% Hallucinated Citations</span>
+        </div>
+        <div style="font-size: 0.9rem; line-height: 1.6;">KPMG published "Total Experience: Redefining Excellence in the Age of Agentic AI" (Oct 2025). GPTZero's investigation found 40 of 45 citations (89%) were hallucinated or misattributed. One citation referenced a 2019 press release as evidence of agentic AI, a term that entered public discourse only in 2024. KPMG pulled the report and acknowledged failures in human oversight.</div>
+      </div>
+
+      <div style="padding: 1rem 1.25rem; background: rgba(22,29,48,0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
+          <span style="background: rgba(245,158,11,0.12); color: #fbbf24; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 4px;">AUDIT</span>
+          <span style="color: #fff; font-family: var(--font-heading); font-weight: 700;">Deloitte Australia: Fabricated Court Quote</span>
+        </div>
+        <div style="font-size: 0.9rem; line-height: 1.6;">Deloitte produced a government report (Jul 2025) containing a fabricated federal court quote and references to nonexistent academic research. A Sydney University researcher caught it. Deloitte agreed to a partial refund of AU$440,000. The department kept the report's conclusions. The errors were in the sourcing: the layer nobody checked.</div>
+      </div>
+
+    </div>
+
+    <p>
+      All three incidents happened at the information layer, where a human was still nominally in the loop and could have verified. They didn't. Consider what happens at the actuation layer, where there is no checkpoint to miss.
+    </p>
+
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      Agentic: Autonomy Without Oversight
+    </h2>
+    <p>
+      <strong style="color: #e2e8f0;">OpenClaw</strong> runs on your own machine using Anthropic's Computer Use API, always on, with access to your file system, browser, calendar, and terminal. When it gained traction, developers bought Mac Minis to host it as a 24/7 AI colleague. Jensen Huang called agentic AI the next era of computing at CES 2025. Pilots were announced before architectures were designed. Nobody was asking what the safety model was for an agent that acts as you, with your credentials, around the clock.
+    </p>
+    <p>
+      At the same time, fierce model competition collapsed the cost of attack. Chinese open-weight models (DeepSeek, Qwen) run locally, require no API key, and carry few content restrictions. What once required expensive commercial APIs or specialised criminal tooling now runs on commodity hardware at near-zero marginal cost. Generating thousands of convincing, personalised injection payloads is a reusable prompt, not a deep competency.
+    </p>
+    <p>
+      These two curves meet in indirect prompt injection. Your agent reads a malicious README. The embedded instruction takes over: exfiltrate secrets, redirect output, run a secondary payload. It executes with your credentials, your session, your authorised tools. Audit log says you did it. Traditional access control sees an authenticated session taking authorised actions. Every check passes. There is no protocol in any existing model that distinguishes agent acting on your intent from agent acting on an injected instruction. That is not a misconfiguration. It is structural.
+    </p>
+
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      How the Attack Surface Evolved
+    </h2>
+    <p>
+      AI didn't add one new attack surface. It forked: one path into the development pipeline where AI became a direct contributor to code, one path into the information layer where AI became the source of answers. Then both converged into an autonomous actuation layer where the rules changed again.
+    </p>
+
+    <!-- Evolution fork infographic -->
+    <div style="margin: 1.25rem 0;">
+
+      <!-- CHAT node -->
+      <div style="background: rgba(6,182,212,0.07); border: 1px solid rgba(6,182,212,0.3); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 0.75rem;">
+        <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.6rem;">
+          <span style="font-family: var(--font-heading); font-size: 0.95rem; color: #06b6d4; font-weight: 700;">CHAT</span>
+          <span style="font-size: 0.75rem; color: #475569;">from 2022</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+          <span style="background: rgba(239,68,68,0.1); color: #fca5a5; font-size: 0.75rem; padding: 0.15rem 0.55rem; border-radius: 20px;">Prompt injection</span>
+          <span style="background: rgba(239,68,68,0.1); color: #fca5a5; font-size: 0.75rem; padding: 0.15rem 0.55rem; border-radius: 20px;">Jailbreaking</span>
+          <span style="background: rgba(239,68,68,0.1); color: #fca5a5; font-size: 0.75rem; padding: 0.15rem 0.55rem; border-radius: 20px;">Policy bypass</span>
+          <span style="background: rgba(239,68,68,0.1); color: #fca5a5; font-size: 0.75rem; padding: 0.15rem 0.55rem; border-radius: 20px;">Data exfiltration via prompt</span>
+        </div>
+      </div>
+
+      <!-- Fork connector with arrows -->
+      <div style="position: relative; height: 44px; margin: 0;">
+        <div style="position: absolute; left: calc(50% - 1px); top: 0; width: 2px; height: 50%; background: rgba(6,182,212,0.4);"></div>
+        <div style="position: absolute; left: 24%; right: 24%; top: calc(50% - 1px); height: 2px; background: rgba(6,182,212,0.4);"></div>
+        <div style="position: absolute; left: calc(24% - 1px); top: 50%; width: 2px; height: 50%; background: rgba(6,182,212,0.4);"></div>
+        <div style="position: absolute; left: 24%; bottom: 0; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid rgba(6,182,212,0.55);"></div>
+        <div style="position: absolute; right: calc(24% - 1px); top: 50%; width: 2px; height: 50%; background: rgba(6,182,212,0.4);"></div>
+        <div style="position: absolute; right: 24%; bottom: 0; transform: translateX(50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid rgba(6,182,212,0.55);"></div>
+        <div style="position: absolute; left: 50%; top: 50%; transform: translateX(-50%) translateY(-50%); background: rgba(9,14,24,0.95); padding: 0.1rem 0.65rem; font-size: 0.7rem; color: #475569; white-space: nowrap; font-style: italic;">GPT-4 (2023): two paths</div>
+      </div>
+
+      <!-- Parallel nodes: Coding + Information Work -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+
+        <div style="background: rgba(129,140,248,0.07); border: 1px solid rgba(129,140,248,0.25); border-radius: 10px; padding: 1rem 1.1rem;">
+          <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.6rem;">
+            <span style="font-family: var(--font-heading); font-size: 0.85rem; color: #818cf8; font-weight: 700;">CODING</span>
+            <span style="font-size: 0.7rem; color: #475569;">from 2023</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+            <span style="background: rgba(239,68,68,0.1); color: #fca5a5; font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 4px;">Supply-chain poisoning</span>
+            <span style="background: rgba(239,68,68,0.1); color: #fca5a5; font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 4px;">AI slop to technical debt</span>
+            <span style="background: rgba(239,68,68,0.1); color: #fca5a5; font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 4px;">Phantom package attacks</span>
+          </div>
+        </div>
+
+        <div style="background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.25); border-radius: 10px; padding: 1rem 1.1rem;">
+          <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.6rem;">
+            <span style="font-family: var(--font-heading); font-size: 0.85rem; color: #fbbf24; font-weight: 700;">INFO WORK</span>
+            <span style="font-size: 0.7rem; color: #475569;">from 2023</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+            <span style="background: rgba(239,68,68,0.1); color: #fca5a5; font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 4px;">Hallucinated citations</span>
+            <span style="background: rgba(239,68,68,0.1); color: #fca5a5; font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 4px;">Unverified AI trust gap</span>
+            <span style="background: rgba(239,68,68,0.1); color: #fca5a5; font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 4px;">Adversarial content steering</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Merge connector with arrows -->
+      <div style="position: relative; height: 44px; margin: 0;">
+        <div style="position: absolute; left: calc(24% - 1px); top: 0; width: 2px; height: 50%; background: rgba(239,68,68,0.4);"></div>
+        <div style="position: absolute; right: calc(24% - 1px); top: 0; width: 2px; height: 50%; background: rgba(239,68,68,0.4);"></div>
+        <div style="position: absolute; left: 24%; right: 24%; top: calc(50% - 1px); height: 2px; background: rgba(239,68,68,0.4);"></div>
+        <div style="position: absolute; left: calc(50% - 1px); top: 50%; width: 2px; height: 50%; background: rgba(239,68,68,0.4);"></div>
+        <div style="position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid rgba(239,68,68,0.55);"></div>
+        <div style="position: absolute; left: 50%; top: 50%; transform: translateX(-50%) translateY(-50%); background: rgba(9,14,24,0.95); padding: 0.1rem 0.65rem; font-size: 0.7rem; color: #475569; white-space: nowrap; font-style: italic;">converge at actuation</div>
+      </div>
+
+      <!-- AGENTIC node -->
+      <div style="background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; padding: 1rem 1.25rem;">
+        <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.6rem;">
+          <span style="font-family: var(--font-heading); font-size: 0.95rem; color: #ef4444; font-weight: 700;">AGENTIC</span>
+          <span style="font-size: 0.75rem; color: #475569;">from 2024</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+          <span style="background: rgba(239,68,68,0.12); color: #fca5a5; font-size: 0.75rem; padding: 0.15rem 0.55rem; border-radius: 20px;">Indirect prompt injection</span>
+          <span style="background: rgba(239,68,68,0.12); color: #fca5a5; font-size: 0.75rem; padding: 0.15rem 0.55rem; border-radius: 20px;">WormGPT / FraudGPT</span>
+          <span style="background: rgba(239,68,68,0.12); color: #fca5a5; font-size: 0.75rem; padding: 0.15rem 0.55rem; border-radius: 20px;">Morris II AI worm</span>
+          <span style="background: rgba(239,68,68,0.12); color: #fca5a5; font-size: 0.75rem; padding: 0.15rem 0.55rem; border-radius: 20px;">Weapon is plain text</span>
+        </div>
+      </div>
+
+    </div>
+
+    <p>
+      The fork maps to two attack paths that look nothing alike in practice. A direct attack comes through the interface you built. An indirect attack comes through content your agent was told to trust.
+    </p>
+
+    <!-- Direct vs Indirect contrast table -->
+    <div style="overflow-x: auto; border: 1px solid rgba(6,182,212,0.15); border-radius: 8px; background: rgba(22,29,48,0.4); margin: 0.5rem 0 1rem;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; min-width: 480px;">
+        <thead>
+          <tr style="background: rgba(6,182,212,0.07); border-bottom: 1px solid rgba(6,182,212,0.2);">
+            <th style="text-align: left; padding: 0.75rem 1rem; color: #94a3b8; font-family: var(--font-heading); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; width: 24%;"></th>
+            <th style="text-align: left; padding: 0.75rem 1rem; color: #06b6d4; font-family: var(--font-heading); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;">Direct Attack</th>
+            <th style="text-align: left; padding: 0.75rem 1rem; color: #ef4444; font-family: var(--font-heading); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;">Indirect Injection</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.7rem 1rem; color: #fff; font-weight: 600; font-size: 0.8rem;">How attacker reaches AI</td>
+            <td style="padding: 0.7rem 1rem; color: #94a3b8;">Types directly into the chat interface</td>
+            <td style="padding: 0.7rem 1rem; color: #94a3b8;">Plants instructions in content the agent reads: a README, a web page, a model card</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); background: rgba(255,255,255,0.02);">
+            <td style="padding: 0.7rem 1rem; color: #fff; font-weight: 600; font-size: 0.8rem;">Real example</td>
+            <td style="padding: 0.7rem 1rem; color: #94a3b8;">Jailbreaking ChatGPT to reveal confidential system prompt</td>
+            <td style="padding: 0.7rem 1rem; color: #94a3b8;">Malicious text in a HuggingFace model card hijacks a developer's AI coding agent mid-task</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.7rem 1rem; color: #fff; font-weight: 600; font-size: 0.8rem;">What the AI does</td>
+            <td style="padding: 0.7rem 1rem; color: #94a3b8;">Produces harmful text output: leaked data, bypassed policy</td>
+            <td style="padding: 0.7rem 1rem; color: #fca5a5; font-weight: 500;">Takes real action: calls APIs, writes files, exfiltrates data, using your credentials</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); background: rgba(255,255,255,0.02);">
+            <td style="padding: 0.7rem 1rem; color: #fff; font-weight: 600; font-size: 0.8rem;">Blast radius</td>
+            <td style="padding: 0.7rem 1rem; color: #94a3b8;">Bounded by what the model can say</td>
+            <td style="padding: 0.7rem 1rem; color: #fca5a5; font-weight: 500;">Bounded only by what the agent can do</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 0.7rem 1rem; color: #fff; font-weight: 600; font-size: 0.8rem;">What the logs show</td>
+            <td style="padding: 0.7rem 1rem; color: #94a3b8;">Attack visible in conversation history</td>
+            <td style="padding: 0.7rem 1rem; color: #fca5a5; font-weight: 500;">Audit log says you did it. Attacker is invisible.</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.7rem 1rem; color: #fff; font-weight: 600; font-size: 0.8rem;">Defense lever</td>
+            <td style="padding: 0.7rem 1rem; color: #94a3b8;">Input validation, output filtering, guardrails</td>
+            <td style="padding: 0.7rem 1rem; color: #06b6d4; font-weight: 600;">Constrain what agents can reach and act on</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Era crystallization -->
+    <div style="border-left: 3px solid #818cf8; padding: 0.75rem 1.25rem; margin: 0.5rem 0 1rem;">
+      <p style="color: #e2e8f0; font-size: 1rem; line-height: 1.7; margin: 0;">The first era: attacker manipulates what AI says. The second: attacker hijacks what AI does with your access.</p>
+    </div>
+
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 1rem;">
+      What You Actually Need to Solve
+    </h2>
+    <p>
+      The problem splits cleanly into two tracks. Not because they use different frameworks, but because the attack path is different: one comes at you directly, the other rides the agent you already trust.
+    </p>
+
+    <!-- CTA Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+
+      <!-- Card A: Direct attacks -->
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 10px; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <div style="font-family: var(--font-heading); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #06b6d4; font-weight: 700;">Direct Attacks</div>
+        <h3 style="font-family: var(--font-heading); font-size: 1.05rem; color: #fff; margin: 0; line-height: 1.35;">When the attacker talks to your AI</h3>
+        <p style="color: #94a3b8; font-size: 0.875rem; line-height: 1.6; margin: 0; flex: 1;">
+          Prompt injection, jailbreaks, goal hijacking via the input channel. The app is the surface. Defense means trust boundaries, I/O validation, and session isolation inside the LLM application itself.
+        </p>
+        <a href="#chatbot-security" style="color: #06b6d4; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.25rem;">
+          Securing the Application Layer &rarr;
+        </a>
+      </div>
+
+      <!-- Card B: Indirect / agentic attacks -->
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <div style="font-family: var(--font-heading); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #ef4444; font-weight: 700;">Indirect Attacks</div>
+        <h3 style="font-family: var(--font-heading); font-size: 1.05rem; color: #fff; margin: 0; line-height: 1.35;">When the attacker rides the agent you trust</h3>
+        <p style="color: #94a3b8; font-size: 0.875rem; line-height: 1.6; margin: 0; flex: 1;">
+          Injected instructions in content the agent reads, phantom packages in generated code, poisoned training data. The attack never touches your app. It lands on your host when the agent executes. Defense moves to host and network: Reachability constraints, Capability curtailment, tool permission scoping.
+        </p>
+        <a href="#agentic-security" style="color: #ef4444; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.25rem;">
+          Host + Network Defense Framework &rarr;
+        </a>
+      </div>
+
+    </div>
+
+    <!-- End of Article Minimalist LinkedIn Footer -->
+    <div style="margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <span style="font-size: 0.85rem; color: #64748b; font-family: 'Space Grotesk', sans-serif;">
+        Follow along for upcoming security research & technical write-ups.
+      </span>
+      <a href="https://www.linkedin.com/in/jymcheong/" target="_blank" rel="noopener noreferrer" 
+         style="color: #06b6d4; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;"
+         onmouseover="this.style.color='#38bdf8'" onmouseout="this.style.color='#06b6d4'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0;"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+        Connect on LinkedIn &rarr;
+      </a>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,237 @@
+<div id="main-content">
+  <a href="#posts" style="color: #06b6d4; text-decoration: none; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 1.5rem;">
+    &larr; Back to Articles
+  </a>
+
+  <h1 style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff; line-height: 1.2;">
+    Why ZeroTier? Because the Best Attack Surface Management Is No Surface.
+  </h1>
+
+  <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 2rem; display: flex; gap: 1rem; font-family: 'Space Grotesk', sans-serif;">
+    <span>July 31, 2026</span>
+    <span>•</span>
+    <span>Category: ZeroTrust WAN</span>
+    <span>•</span>
+    <span>Part 1 of the ZeroTier HOWTO Series</span>
+  </div>
+
+  <div style="color: #94a3b8; font-size: 1rem; line-height: 1.7; display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <!-- Disclaimer -->
+    <div style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.18); padding: 0.85rem 1rem; font-size: 0.85rem; color: #94a3b8; border-radius: 6px;">
+      <strong style="color: #cbd5e1;">Disclaimer:</strong> I write in a personal capacity only. These views do not represent my current or any past employer. I have no financial relationship with ZeroTier, Inc.: no compensation, sponsorship, or incentive of any kind. This series is written as part of my CISSP Continuing Professional Education (CPE) commitment. I have no stake in promoting ZeroTier beyond a genuine belief that its design and architecture are sound, and an appreciation for the founder's core conviction that <em>"networking shouldn't be hard,"</em> reflected in ZeroTier's open-source core and the decision to make enterprise-grade private networking accessible without expensive hardware or proprietary lock-in. It is in that spirit that I enjoy using and sharing it.
+    </div>
+
+    <!-- Hook -->
+    <p style="color: #e2e8f0; font-size: 1.05rem;">
+      Open your server's SSH auth log. Go ahead: <code style="font-family: var(--font-mono); background: rgba(6,182,212,0.08); padding: 2px 6px; border-radius: 4px; color: #06b6d4;">grep "Failed" /var/log/auth.log | wc -l</code>. Thousands of attempts. Every night. From IPs you've never heard of. Your lock held. But the door is on a public street, and every stranger on the internet knows exactly where it is.
+    </p>
+
+    <p>
+      This series is about changing that. Not hardening the door. Removing it from the street entirely. ZeroTier is the tool. But first: why does the current model fail, and what does it cost you?
+    </p>
+
+    <!-- Problem 1 -->
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      Problem 1: The Bouncer Problem
+    </h2>
+
+    <p>
+      When you expose SSH, RDP, or any admin port to the public internet, you're hiring a bouncer. Strong password policy, key-based auth, fail2ban: that's your bouncer. Most nights, he holds the line.
+    </p>
+
+    <p>
+      The problem: the bouncer only controls who gets <em>in</em>. He can't stop someone from walking up to the door. And when a CVE drops in OpenSSH, RDP, or the VPN daemon itself, the attacker doesn't need to get past the bouncer; they exploit the door frame itself.
+    </p>
+
+    <!-- Manga Illustration: Problem 1 -->
+    <figure style="margin: 1.5rem 0; border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 12px; overflow: hidden; background: #0a0f1e; text-align: center;">
+      <img src="manga_problem1_bouncer.jpg" alt="Manga Illustration: The Bouncer Problem" style="width: 100%; max-width: 550px; height: auto; display: block; margin: 0 auto; border-bottom: 1px solid rgba(6, 182, 212, 0.15);">
+      <figcaption style="padding: 0.75rem 1rem; font-size: 0.85rem; color: #94a3b8; font-family: var(--font-heading);">
+        <strong style="color: #06b6d4;">Fig 1. The Bouncer Problem:</strong> Authentication (the bouncer) holds the door, but cannot stop adversaries from touching the door frame (exploiting zero-day CVEs directly on the open street).
+      </figcaption>
+    </figure>
+
+    <div style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.18); padding: 1rem 1.25rem; border-radius: 6px; font-size: 0.95rem;">
+      <strong style="color: #e2e8f0;">Security principle:</strong> Authentication protects the session. It does not prevent the connection from being established. A daemon-level vulnerability can be exploited before a single credential is ever checked.
+    </div>
+
+    <p>
+      <strong style="color: #e2e8f0;">The cost:</strong> Someone monitors those logs. Someone patches CVEs on a deadline. Someone gets paged at 3am. That's ongoing ops overhead to maintain a door that shouldn't be on a public street.
+    </p>
+
+    <!-- Problem 2 -->
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      Problem 2: Traditional VPN. You Moved the Door, Not the Street
+    </h2>
+
+    <p>
+      VPN sounds like the fix. Put everything behind a gateway, force all access through the tunnel. Your services are off the public internet. Problem solved?
+    </p>
+
+    <p>
+      Not quite. The VPN gateway still has to sit on a public address to accept incoming connections. You didn't remove the target; you consolidated it. Now the gateway is what everyone attacks. And enterprise VPN appliances have had some of the worst CVEs in recent memory: Fortinet, Pulse Secure, Cisco ASA. The vendors you're paying to protect you become the attack surface.
+    </p>
+
+    <p>
+      Then there's the inside problem. Once someone is past the VPN gate, they're in a flat network. A compromised laptop, a stolen credential: that device can reach everything behind the perimeter. Security teams call this the "assumed breach" problem. The perimeter model has no answer for it.
+    </p>
+
+    <!-- Manga Illustration: Problem 2 -->
+    <figure style="margin: 1.5rem 0; border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 12px; overflow: hidden; background: #0a0f1e; text-align: center;">
+      <img src="manga_problem2_vpn.jpg" alt="Manga Illustration: Traditional VPN Architecture Vulnerabilities" style="width: 100%; max-width: 550px; height: auto; display: block; margin: 0 auto; border-bottom: 1px solid rgba(6, 182, 212, 0.15);">
+      <figcaption style="padding: 0.75rem 1rem; font-size: 0.85rem; color: #94a3b8; font-family: var(--font-heading);">
+        <strong style="color: #06b6d4;">Fig 2. Traditional VPN:</strong> You consolidated the attack surface onto a single public gateway while leaving the unsegmented internal network vulnerable to lateral movement ("assumed breach").
+      </figcaption>
+    </figure>
+
+    <div style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.18); padding: 1rem 1.25rem; border-radius: 6px; font-size: 0.95rem;">
+      <strong style="color: #e2e8f0;">Security principle:</strong> Perimeter trust: inside is trusted by default. That assumption breaks the moment one node is compromised.
+    </div>
+
+    <p>
+      <strong style="color: #e2e8f0;">The cost:</strong> Enterprise VPN hardware runs $10K-$100K+ in licensing and annual support. Network engineers to manage config distribution as users and nodes change. And the gateway itself needs constant patching; you're paying to maintain another attack surface.
+    </p>
+
+    <!-- Who this is for -->
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      Who Is This For?
+    </h2>
+
+    <p>
+      If you run a home lab or are working toward a security certification, ZeroTier gives you production-grade private networking on student-grade hardware. You can replicate real-world segmented architectures across a few cheap VPS nodes and actually understand what you are building, not just follow a recipe.
+    </p>
+
+    <p>
+      If you are a developer or architect evaluating infrastructure, this series covers the cost model, the trust model, and the operational tradeoffs honestly. ZeroTier is not the right tool for every situation. The goal is enough depth to make an informed call, not a sales pitch.
+    </p>
+
+    <p>
+      If you lead a team and want to move faster on zero-trust networking without a six-figure hardware budget or a dedicated network engineer, the self-hosted path in this series is built for you. A $5 VPS, an afternoon, and you own the keys. The next section explains how.
+    </p>
+
+    <!-- The shift -->
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      The Shift: No Street Address
+    </h2>
+
+    <p>
+      The bouncer problem and the VPN problem share a root cause: <strong style="color: #e2e8f0;">perimeter thinking</strong>. There's a line. Inside is trusted, outside is not. The security model is about defending that line, whether it's the auth daemon or the VPN gateway.
+    </p>
+
+    <p>
+      ZeroTier takes a different position entirely. What if your services had no public address at all? Not a locked door. No door on any street anyone can find.
+    </p>
+
+    <p>
+      Here's how it works: each node gets a cryptographic identity. The controller (which you self-host) decides which identities are allowed into the network. When an approved node joins, the address exists for it, and only for it. Scanners can't find your SSH port because it isn't bound to your public interface. Shodan doesn't list it. There's nothing to probe.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 0.5rem 0;">
+      <div style="background: rgba(30, 41, 59, 0.35); border: 1px solid rgba(255,255,255,0.05); padding: 1.25rem; border-radius: 8px;">
+        <strong style="color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.5rem;">Old model</strong>
+        <span style="font-size: 0.95rem;">Harden what's exposed</span>
+      </div>
+      <div style="background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6,182,212,0.2); padding: 1.25rem; border-radius: 8px;">
+        <strong style="color: #06b6d4; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.5rem;">ZeroTier model</strong>
+        <span style="font-size: 0.95rem;">Don't expose it</span>
+      </div>
+    </div>
+
+    <p>
+      <strong style="color: #e2e8f0;">The cost:</strong> ZeroTier is free up to 25 nodes on their managed tier. Self-hosted controller (which is what this series covers) runs on a $5/month VPS with no node limit and no vendor dependency. No gateway hardware. No license. Adding a node is an API call. Revoking is one flag flip. You own the keys.
+    </p>
+
+    <!-- Segmentation / Zero-Trust mental model -->
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      Zero-Trust: Think of It Like Chat Rooms
+    </h2>
+
+    <p>
+      Removing the public address solves external exposure. But what stops lateral movement once a node is inside? ZeroTier's answer is isolation by default. Think of each ZeroTier network as a private, encrypted group chat. Only nodes the controller explicitly approves can join. A node in one network cannot see or reach nodes in a different network, even if both run on the same physical server.
+    </p>
+
+    <p>
+      This is micro-segmentation at the device identity layer. Your development environment, your production database cluster, your payment processing nodes: each lives in its own chat room. A compromised dev node cannot reach prod. A stolen credential from one environment does not open any door in another.
+    </p>
+
+    <p>
+      Within a single network, ZeroTier flow rules add another layer. You can specify that the web frontend can only reach the API server on port 443, and the API server can only reach the database on port 5432. No other paths allowed. This is not a firewall on a perimeter: it is identity-aware, policy-enforced routing baked into the network fabric itself.
+    </p>
+
+    <div style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.18); padding: 1rem 1.25rem; border-radius: 6px; font-size: 0.95rem;">
+      <strong style="color: #e2e8f0;">Zero-trust principle:</strong> Membership in a network is not trust. Trust is explicit, per-path, and policy-enforced. A compromised node inside a ZeroTier network does not automatically reach every other node inside it.
+    </div>
+
+    <!-- Device identity -->
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      Device Identity, Decoupled from User Identity
+    </h2>
+
+    <p>
+      Segmentation contains a breach once inside. Device identity goes further: it prevents the wrong device from entering at all. Traditional network auth asks "who are you?" and accepts a password as proof. ZeroTier asks "which device are you?" and requires a cryptographic key only that device holds.
+    </p>
+
+    <p>
+      Every ZeroTier node generates a unique identity key pair on first install. Its 40-bit network address is derived from the public key hash. You cannot claim another node's address without its private key. A stolen password does not get an attacker onto the network from a different machine.
+    </p>
+
+    <p>
+      This is where ZeroTier's threat model diverges sharply from a shared-credential VPN. A compromised password in a traditional VPN grants any device full network access. In a ZeroTier network, the password is irrelevant. The controller authorizes specific devices. Access follows the device, not the account.
+    </p>
+
+    <p>
+      There is a deeper advantage here. When a user's credentials are stolen and used from an unrecognized device, traditional auth cannot distinguish that from a legitimate login. The password matched. ZeroTier can. The attacker's device carries a key the controller has never authorized. The connection fails in a way that is precisely attributable: valid user identity, wrong device identity. That is not just access control. That is anomaly detection baked into the network layer. Cross-reference your user activity logs with device identity and you have a concrete breach signal before any damage is done.
+    </p>
+
+    <div style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.18); padding: 1rem 1.25rem; border-radius: 6px; font-size: 0.95rem;">
+      <strong style="color: #e2e8f0;">Zero-trust at the device layer:</strong> The unit of trust is the node's cryptographic identity, not a user account. Stolen credentials on an unauthorized device fail visibly, not silently. Valid user, wrong device is a detectable signal, not a gap in your logs.
+    </div>
+
+    <!-- Objection: controller vulnerability -->
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      "Isn't the Controller Just Another Bouncer?"
+    </h2>
+
+    <p>
+      The segmentation and device identity arguments are compelling. A skeptical reader will ask the obvious question: if ZeroTier removes the public door, doesn't the controller itself become the door? The ZeroTier controller daemon listens on port 9993 UDP. If you self-host, that port is reachable from the internet. It sounds like the bouncer problem in a different shirt.
+    </p>
+
+    <p>
+      The difference is what happens at that port. With SSH, there is an unauthenticated handshake phase: the daemon processes attacker-controlled input before identity is ever checked. That is where pre-auth CVEs live. ZeroTier's protocol does not have that phase. Every packet carries a cryptographic signature tied to the sending node's identity. The daemon validates the signature before it processes anything. There is no unauthenticated surface to exploit first.
+    </p>
+
+    <p>
+      The management plane is a separate concern entirely. The web UI and API that actually authorize nodes do not need to face the internet at all. You can run the management interface on localhost, or behind a ZeroTier network the controller itself manages. The door that grants access to the network can live inside the network it protects.
+    </p>
+
+    <div style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.18); padding: 1rem 1.25rem; border-radius: 6px; font-size: 0.95rem;">
+      <strong style="color: #e2e8f0;">The distinction:</strong> SSH's bouncer checks identity after a connection is established. ZeroTier's protocol validates identity before anything is processed. The management plane that grants network membership never needs to sit on a public street at all.
+    </div>
+
+    <!-- Series teaser -->
+    <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(6, 182, 212, 0.15); padding: 1.5rem; border-radius: 8px; margin-top: 0.5rem;">
+      <p style="color: #e2e8f0; font-size: 0.95rem; margin: 0 0 0.75rem; font-family: var(--font-heading); font-weight: 700;">Coming up in this series</p>
+      <p style="color: #94a3b8; font-size: 0.9rem; margin: 0 0 1rem;">For every how-to guide, I will pair the write-up with a <strong style="color: #e2e8f0;">skills-based AI agent prompt</strong>. Instead of copy-pasting shell commands from a blog and hoping your environment matches mine, you run the skill with your own AI agent. It adapts to your setup, catches your errors, and gets you to a working state fast. From zero to a self-hosted ZeroTier controller: under 30 minutes, no network engineering background required.</p>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+        <span style="color: #06b6d4;">&#8594; <strong style="color: #e2e8f0;">Part 2:</strong> Self-hosting your ZeroTier controller: unlimited nodes, you own the keys</span>
+        <span style="color: #64748b;">&#8594; <strong style="color: #94a3b8;">Part 3:</strong> Private DNS on the mesh: names instead of IPs, isolated from public internet</span>
+        <span style="color: #64748b;">&#8594; <strong style="color: #94a3b8;">Part 4:</strong> Automated node onboarding: HMAC tokens, one-liner scripts, zero manual steps</span>
+      </div>
+    </div>
+
+    <!-- LinkedIn Footer -->
+    <div style="margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <span style="font-size: 0.85rem; color: #64748b; font-family: 'Space Grotesk', sans-serif;">
+        Follow for upcoming security research &amp; technical write-ups.
+      </span>
+      <a href="https://www.linkedin.com/in/jymcheong/" target="_blank" rel="noopener noreferrer"
+         style="color: #06b6d4; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;"
+         onmouseover="this.style.color='#38bdf8'" onmouseout="this.style.color='#06b6d4'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0;"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+        Connect on LinkedIn &#8594;
+      </a>
+    </div>
+
+  </div>
+</div>

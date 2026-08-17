@@ -1,0 +1,1 @@
+Every time an engineer opens a new chat session, intelligence resets to zero. Past decisions, bugs, and architecture choices vanish into dark archives.

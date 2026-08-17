@@ -1,0 +1,1 @@
+Inside your project repository, you will find three core directories. Assets contains your application code. Knowledge holds current architecture state and append-only timelines. Skills stores explicit task procedures. Together, they allow your agent to orient, actuate, and persist cleanly.

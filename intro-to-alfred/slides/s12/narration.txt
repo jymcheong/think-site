@@ -1,0 +1,1 @@
+Local git version control is the safety net for agentic coding. The handover package includes a dedicated git-commit skill. It updates session notes, flushes knowledge timelines, and commits changes locally without pushing to remote repositories, giving students complete undo safety and transparent diff reviews.

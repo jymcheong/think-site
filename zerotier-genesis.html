@@ -1,0 +1,136 @@
+<div id="main-content">
+  <a href="#posts" style="color: #06b6d4; text-decoration: none; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 1.5rem;">
+    &larr; Back to Articles
+  </a>
+
+  <h1 style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff; line-height: 1.2;">
+    Agentic Zero-Trust Networking, at the Price of a VPS
+  </h1>
+
+  <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 2rem; display: flex; gap: 1rem; font-family: 'Space Grotesk', sans-serif;">
+    <span>August 2026</span>
+    <span>&bull;</span>
+    <span>Category: ZeroTrust WAN</span>
+    <span>&bull;</span>
+    <span>Part 2 of the ZeroTier HOWTO Series</span>
+  </div>
+
+  <div style="color: #94a3b8; font-size: 1rem; line-height: 1.7; display: flex; flex-direction: column; gap: 1.5rem;">
+
+    <!-- Disclaimer -->
+    <div style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.18); padding: 0.85rem 1rem; font-size: 0.85rem; color: #94a3b8; border-radius: 6px;">
+      <strong style="color: #cbd5e1;">Disclaimer:</strong> I write in a personal capacity only. These views do not represent my current or any past employer. I have no financial relationship with ZeroTier, Inc.: no compensation, sponsorship, or incentive of any kind. This series is written as part of my CISSP Continuing Professional Education (CPE) commitment. I have no stake in promoting ZeroTier beyond a genuine belief that its design and architecture are sound, and an appreciation for the founder's core conviction that <em>"networking shouldn't be hard,"</em> reflected in ZeroTier's open-source core and the decision to make enterprise-grade private networking accessible without expensive hardware or proprietary lock-in. It is in that spirit that I enjoy using and sharing it.
+    </div>
+
+    <p style="color: #e2e8f0; font-size: 1.5rem; font-weight: 600; line-height: 1.3;">
+      Want an agentic, zero-trust software-defined network, run entirely by AI, at the price of a $4/mo VPS?
+    </p>
+
+    <p style="font-size: 0.9rem;">
+      New to ZeroTier? <a href="https://think.jym.sg/#zerotier-why" style="color: #06b6d4; text-decoration: underline;">Part 1 of this series</a> covers why it beats the perimeter/VPN model entirely. This one picks up from there and goes agentic.
+    </p>
+
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      What You Actually Get
+    </h2>
+
+    <p style="color: #e2e8f0;">Use cases this actually unlocks:</p>
+
+    <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+      <li><strong style="color: #e2e8f0;">Home security lab</strong> &mdash; isolate a vulnerable VM in its own zone, blast-radius contained by construction, torn down when you're done.</li>
+      <li><strong style="color: #e2e8f0;">Cyber range</strong> &mdash; stand up attacker/defender/decoy zones per exercise, agent-provisioned, disposable.</li>
+      <li><strong style="color: #e2e8f0;">Agile agentic IT zone management</strong> &mdash; new project, new isolated zone, no ticket to network ops.</li>
+      <li><strong style="color: #e2e8f0;">Granular zone control without the pain and cost of firewalls.</strong> ZeroTier's flow rules act as its own firewall layer, no separate firewall change request needed.</li>
+      <li><strong style="color: #e2e8f0;">Out-of-band network analytics.</strong> It even has a <code style="font-family: var(--font-mono); background: rgba(6,182,212,0.08); padding: 2px 6px; border-radius: 4px; color: #06b6d4;">tee</code> command to capture packet metadata for point-to-point visibility, while session content stays fully encrypted end to end.</li>
+      <li><strong style="color: #e2e8f0;">Unlimited zones</strong> &mdash; no 25-node SaaS cap, no per-network pricing tier standing between you and the next test.</li>
+    </ul>
+
+    <p>
+      Doing this by hand is daunting and tedious: click into a dashboard, name a network, click into member management, authorize each node one by one, repeat every time you need a new zone. That friction is exactly why most people provision one network and never touch it again.
+    </p>
+
+    <p>
+      Self-host the controller, and none of that clicking is necessary. Every step is one API call: create a network, authorize a node, assign an IP, each a single <code style="font-family: var(--font-mono); background: rgba(6,182,212,0.08); padding: 2px 6px; border-radius: 4px; color: #06b6d4;">curl</code>. That's exactly what makes it ideal for agentic orchestration: an agent can create networks and onboard endpoints with none of the friction a human dashboard demands, turning network zones into something you spin up on demand, as many as you need.
+    </p>
+
+    <p>
+      This is how I run my own personal lab today: an agent spinning up separate network zones on demand, for testing and learning, without me ever opening a browser to do it.
+    </p>
+
+    <p style="color: #06b6d4; font-size: 1.2rem; font-weight: 700; font-family: var(--font-heading); border-left: 3px solid #06b6d4; padding-left: 1rem;">
+      Today, I'm sharing exactly how.
+    </p>
+
+    <p>
+      What follows is the actual step-by-step: not because you need to type any of it yourself, but so you can see exactly what your agent will be doing on your behalf, and verify it for yourself before you trust it.
+    </p>
+
+    <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-top: 0.5rem;">
+      Zero Exposure, By Design
+    </h2>
+
+    <p>
+      Most self-hosting guides solve the setup UI's exposure problem with a rushed manual race against Shodan. An agent skips the race entirely: it never needed the UI to begin with. Here's its plan:
+    </p>
+
+    <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+      <li><strong style="color: #e2e8f0;">Stand up the VPS.</strong> Add a sudoer account with passwordless, key-based login. Passwordless matters specifically because an agent can't sit at an interactive prompt and type a sudo password; key-based auth is something it can actually use.</li>
+      <li><strong style="color: #e2e8f0;">Clone <a href="https://github.com/jymcheong/agentic-zerotier-controller" style="color: #06b6d4; text-decoration: underline;" target="_blank" rel="noopener">the repo</a> and point your agent at it.</strong> This is what actually drives everything below: the agent reads the procedure from the repo, then runs the whole controller setup itself using the account you just handed it.</li>
+      <li><strong style="color: #e2e8f0;">Confirm access, then lock the door.</strong> Verify key-based SSH login actually works before disabling password auth. Skip this check and you lock yourself out of your own box.</li>
+      <li><strong style="color: #e2e8f0;">The agent starts the ZeroTier controller software on the VPS.</strong> This is the piece that will manage your private network from now on. Nothing about it is reachable from the public internet yet, or ever.</li>
+      <li><strong style="color: #e2e8f0;">The agent creates your network, then tells you its ID.</strong> This is your one manual step: on your own laptop, run <code style="font-family: var(--font-mono); background: rgba(6,182,212,0.08); padding: 2px 6px; border-radius: 4px; color: #06b6d4;">zerotier-cli join &lt;the ID the agent gave you&gt;</code> (or just paste the ID into the ZeroTier client's UI widget), then send the agent the node ID that comes back.</li>
+      <li><strong style="color: #e2e8f0;">The agent authorizes your laptop, then finally turns on the web dashboard.</strong> The dashboard only ever answers over the ZeroTier network, never the public internet, and by the time it's up, your laptop is already allowed in.</li>
+    </ul>
+
+    <p>
+      Once you've stood up the VPS and pointed your agent at the repo, everything from here is what the agent runs. You don't need to type any of it; it's here so you can see exactly what it's doing on your behalf.
+    </p>
+
+    <h3 style="color: #fff; font-size: 1.1rem; margin-top: 0.5rem;">Step 1: Confirm key access, then harden</h3>
+    <p>Haven't parked your public key on the VPS yet? <a href="https://docs.digitalocean.com/products/droplets/how-to/add-ssh-keys/" style="color: #06b6d4; text-decoration: underline;" target="_blank" rel="noopener">DigitalOcean's own guide</a> covers it whether you're creating a fresh droplet or adding a key to one that already exists. Do that first.</p>
+    <p>From a second terminal, before touching sshd config at all, confirm the key-based login actually works:</p>
+    <pre style="background: #0a0f1e; border: 1px solid rgba(6,182,212,0.15); border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.85rem; color: #94a3b8;"><code>ssh -o PasswordAuthentication=no -o PreferredAuthentications=publickey user@vps "echo key-auth-ok"</code></pre>
+    <p>Only once that prints <code style="font-family: var(--font-mono); background: rgba(6,182,212,0.08); padding: 2px 6px; border-radius: 4px; color: #06b6d4;">key-auth-ok</code> does it disable password auth:</p>
+    <pre style="background: #0a0f1e; border: 1px solid rgba(6,182,212,0.15); border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.85rem; color: #94a3b8;"><code>sudo sed -i 's/^#\?PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+sudo systemctl restart ssh</code></pre>
+
+    <h3 style="color: #fff; font-size: 1.1rem; margin-top: 0.5rem;">Step 2: Start the controller software, nothing web-facing yet</h3>
+    <p>The agent starts a single container running the ZeroTier controller engine. No ports published except the ZeroTier protocol itself, nothing a browser could ever reach.</p>
+
+    <h3 style="color: #fff; font-size: 1.1rem; margin-top: 0.5rem;">Step 3: Create the network, then you join it</h3>
+    <p>Using the controller's own local auth token, the agent creates your first network and hands you back its ID. That's your one manual step: run <code style="font-family: var(--font-mono); background: rgba(6,182,212,0.08); padding: 2px 6px; border-radius: 4px; color: #06b6d4;">zerotier-cli join</code> on your own machine with that ID, then run <code style="font-family: var(--font-mono); background: rgba(6,182,212,0.08); padding: 2px 6px; border-radius: 4px; color: #06b6d4;">zerotier-cli info</code> to get your own node ID. No terminal handy? The ZeroTier client's UI widget does the same thing: paste the network ID in to join, then copy your node ID from the same screen.</p>
+
+    <div style="background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.25); padding: 1.1rem 1.35rem; border-radius: 8px; font-size: 1rem; color: #e2e8f0;">
+      <strong style="color: #06b6d4; font-family: var(--font-heading); display: block; margin-bottom: 0.4rem;">Copy-paste this to your agent</strong>
+      <p style="margin: 0 0 0.5rem 0;">Your agent won't know your node ID exists until you tell it. Swap in the ID <code style="font-family: var(--font-mono); background: rgba(6,182,212,0.08); padding: 2px 6px; border-radius: 4px; color: #06b6d4;">zerotier-cli info</code> just printed, then send this:</p>
+      <div style="position: relative;">
+        <pre id="join-prompt-text" style="background: #0a0f1e; border: 1px solid rgba(6,182,212,0.15); border-radius: 8px; padding: 0.85rem 1rem; padding-right: 4.5rem; white-space: pre-wrap; word-break: break-word; font-family: var(--font-mono); font-size: 0.85rem; color: #94a3b8; margin: 0;"><code>I've joined the network. My node ID is [paste your actual node ID here]. Authorize it on the controller.</code></pre>
+        <button onclick="(function(btn){var text=document.getElementById('join-prompt-text').innerText;function done(){btn.innerText='Copied';setTimeout(function(){btn.innerText='Copy'},1500)}if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(done).catch(function(){fallback()})}else{fallback()}function fallback(){var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');done()}catch(e){btn.innerText='Select text manually'}document.body.removeChild(ta)}})(this)" style="position: absolute; top: 0.6rem; right: 0.6rem; background: rgba(6,182,212,0.12); color: #06b6d4; border: 1px solid rgba(6,182,212,0.3); border-radius: 6px; padding: 0.3rem 0.6rem; font-size: 0.75rem; font-family: var(--font-heading); font-weight: 600; cursor: pointer;">Copy</button>
+      </div>
+    </div>
+
+    <p>The agent authorizes it the same way it created the network: one local API call, no dashboard involved.</p>
+
+    <p>This is the zero-trust part in practice, not just in name: joining the network gets you nothing on its own. Every single node, including the one YOU are sitting at, is denied by default until explicitly authorized by ID. Being on the network proves nothing; being authorized does.</p>
+
+    <h3 style="color: #fff; font-size: 1.1rem; margin-top: 0.5rem;">Step 4: Only now, turn on the web dashboard</h3>
+    <p>The dashboard is <a href="https://github.com/dec0dos/zero-ui" style="color: #06b6d4; text-decoration: underline;" target="_blank" rel="noopener">ZeroUI</a>, an open-source web UI for managing a self-hosted ZeroTier controller: networks, members, IP assignments, all the things you'd otherwise click through on `my.zerotier.com`. It goes up last, bound to the mesh it just created, not the public internet.</p>
+    <div style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.18); padding: 1rem 1.25rem; border-radius: 6px; font-size: 0.95rem;">
+      <p style="margin: 0 0 0.4rem 0;"><strong style="color: #e2e8f0;">Public internet:</strong> connection refused. Zero exposure.</p>
+      <p style="margin: 0;"><strong style="color: #e2e8f0;">Over ZeroTier:</strong> opens cleanly, for the human who eventually wants to look.</p>
+    </div>
+
+    <p>
+      The exact commands the agent runs at every step, including everything that broke and got fixed during live testing, live in the repo: <a href="https://github.com/jymcheong/agentic-zerotier-controller" style="color: #06b6d4; text-decoration: underline;" target="_blank" rel="noopener">github.com/jymcheong/agentic-zerotier-controller</a>. Clone it, point your agent at it, and go.
+    </p>
+
+    <p style="color: #06b6d4; font-size: 1.2rem; font-weight: 700; font-family: var(--font-heading); border-left: 3px solid #06b6d4; padding-left: 1rem;">
+      Let you in on a secret: it doesn't have to be a VPS at all.
+    </p>
+
+    <p>
+      Everything above works the same on a local VM, no rented server needed. I ran this exact flow on my own Mac Mini, with a VM, and joined it from my phone on cellular data, no port forwarding, no static IP. ZeroTier's relay fallback means it connects even through the NAT types that block a direct path, it just costs you an extra hop instead of going peer to peer. The one real caveat: it's only as reachable as your home power and connection are, no VPS-grade uptime.
+    </p>
+
+  </div>
+</div>

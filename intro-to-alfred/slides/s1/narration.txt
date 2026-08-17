@@ -1,0 +1,1 @@
+We waste hours re-explaining the same repository layout, re-pasting environment configs, and copy-pasting code snippets across incompatible tools.

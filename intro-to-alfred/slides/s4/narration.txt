@@ -1,0 +1,1 @@
+Heavy agent frameworks rely on vector embeddings and opaque graph databases that operate like black boxes. Plain markdown memory gives you four decisive advantages: human readability, zero infrastructure overhead, native git diff auditability, and total vendor independence. You can inspect, edit, and version your memory with standard tools.
